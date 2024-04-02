@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include "NNet.h"
+#include "../NNet.h"
 
 std::vector<std::string> split(std::string in, char del){
     std::vector<std::string> out;
     std::string temp = "";
-    for(int i = 0; i < in.size(); i++){
+    for(std::size_t i = 0; i < in.size(); i++){
         if(in[i] == del){
             out.push_back(temp);
             temp = "";
@@ -27,7 +27,7 @@ std::vector<float> yval(std::string in){
 
 void update(Matrix<float>& X, Matrix<float>& Y, std::string line, int p){
     std::vector<std::string> parts = split(line, ',');
-    for(int i = 1; i < parts.size(); i++){
+    for(std::size_t i = 1; i < parts.size(); i++){
         X.at(p, i-1) = std::stof(parts[i]);
     }
     std::vector<float> Yparts = yval(parts[0]);
@@ -38,9 +38,9 @@ void update(Matrix<float>& X, Matrix<float>& Y, std::string line, int p){
 
 Matrix<float> max(Matrix<float>& m){
     std::vector<float> d(m.shape().first, 0);
-    for(int i = 0; i < m.shape().first; i++){
+    for(std::size_t i = 0; i < m.shape().first; i++){
         int p = 0;
-        for(int j = 0; j < m.shape().second; j++){
+        for(std::size_t j = 0; j < m.shape().second; j++){
             if(m.at(i, j) > m.at(i, p))
                 p = j;
         }
@@ -92,7 +92,7 @@ int main(){
 
     float correct = 0.0;
     Matrix<float> pred = max(Ypred);
-    for(int i = 0; i < Ytest.shape().first; i++){
+    for(std::size_t i = 0; i < Ytest.shape().first; i++){
         if(Ytest.at(i, 0) == pred.at(i,0)) correct++;
     }
     std::cout << "accuracy: " << correct/testSize << std::endl;

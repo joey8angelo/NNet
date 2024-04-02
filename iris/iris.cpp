@@ -1,12 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include "NNet.h"
+#include "../NNet.h"
 
 std::vector<std::string> split(std::string in, char del){
     std::vector<std::string> out;
     std::string temp = "";
-    for(int i = 0; i < in.size(); i++){
+    for(std::size_t i = 0; i < in.size(); i++){
         if(in[i] == del){
             out.push_back(temp);
             temp = "";
@@ -51,7 +51,6 @@ int main(){
     Matrix<float> Ytest(75, 3);
 
     std::string line;
-    bool t = true;
     for(int p = 0; p < 75; p++){
         std::getline(file, line);
         update(Xtrain, Ytrain, line, p);
