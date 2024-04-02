@@ -1,8 +1,8 @@
 #pragma once
 #include "../Matrix/Matrix.h"
 #include <cmath>
-
-#include<vector>
+#include <vector>
+#include <iostream>
 
 class NNet{
     public:

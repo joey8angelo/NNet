@@ -3,6 +3,11 @@
 #include <fstream>
 #include "../NNet.h"
 
+const std::string trainPath = "mnist/mnist_train.csv";
+const std::string testPath = "mnist/mnist_test.csv";
+const int trainSize = 60000;
+const int testSize = 10000;
+
 std::vector<std::string> split(std::string in, char del){
     std::vector<std::string> out;
     std::string temp = "";
@@ -37,26 +42,25 @@ void update(Matrix<float>& X, Matrix<float>& Y, std::string line, int p){
 }
 
 Matrix<float> max(Matrix<float>& m){
-    std::vector<float> d(m.shape().first, 0);
+    Matrix<float> d(m.shape().first, m.shape().second);
     for(std::size_t i = 0; i < m.shape().first; i++){
         int p = 0;
         for(std::size_t j = 0; j < m.shape().second; j++){
             if(m.at(i, j) > m.at(i, p))
                 p = j;
         }
-        d.push_back(p);
+        d.at(i,p) = 1;
     }
-    return Matrix(m.shape().first, 1, d);
+    return d;
 }
 
 int main(){
-    int trainSize = 60000;
-    int testSize = 10000;
     // read mnist testing data
-    std::ifstream file("mnist_train.csv");
+    std::ifstream trainFile(trainPath);
+    std::ifstream testFile(testPath);
+
     Matrix<float> Xtrain(trainSize, 784);
     Matrix<float> Ytrain(trainSize, 10);
-
     Matrix<float> Xtest(testSize, 784);
     Matrix<float> Ytest(testSize, 10);
 
@@ -65,19 +69,19 @@ int main(){
     // parse input and insert into matrices for testing data
     std::string line;
     for(int p = 0; p < trainSize; p++){
-        std::getline(file, line);
+        std::getline(trainFile, line);
         update(Xtrain, Ytrain, line, p);
     }
 
-    file.close();
-    // read mnist training data
-    file.open("minst_test.csv");
+    trainFile.close();
 
     // parse and insert into matrices
     for(int p = 0; p < testSize; p++){
-        std::getline(file, line);
+        std::getline(testFile, line);
         update(Xtest, Ytest, line, p);
     }
+
+    testFile.close();
 
     std::vector<int> layers = {784, 16, 16, 10};
     NNet net(layers);
@@ -91,9 +95,14 @@ int main(){
     std::cout << "testing..." << std::endl;
 
     float correct = 0.0;
-    Matrix<float> pred = max(Ypred);
+    Ypred = max(Ypred);
     for(std::size_t i = 0; i < Ytest.shape().first; i++){
-        if(Ytest.at(i, 0) == pred.at(i,0)) correct++;
+        for(std::size_t j = 0; j < Ytest.shape().second; j++){
+            if(Ytest.at(i, j) == 1 && Ypred.at(i, j) == 1){
+                correct++;
+                break;
+            }
+        }
     }
     std::cout << "accuracy: " << correct/testSize << std::endl;
 }
