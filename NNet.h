@@ -26,6 +26,15 @@ NNet::NNet(std::vector<int> layers) : layers(layers){
         weights.push_back(Matrix<float>(layers[i+1], layers[i]));
         biases.push_back(Matrix<float>(1, layers[i+1], 1));
     }
+    // set weights and biases to random values near 0
+    srand(0);
+    for(std::size_t i = 0; i < layers.size()-1; i++){
+        for(int j = 0; j < layers[i+1]; j++){
+            for(int k = 0; k < layers[i]; k++){
+                weights[i].at(j,k) = (rand() % 1000 - 500) / 1000.0;
+            }
+        }
+    }
 }
 
 NNet::~NNet(){
@@ -65,16 +74,6 @@ std::vector<Matrix<float>> NNet::backprop(const std::vector<Matrix<float>>& Zs, 
 }
 
 void NNet::train(const Matrix<float>& input, const Matrix<float>& target, float lambda=0.1, float error_threshold=1e-6, int max_iter=50000){
-    // set weights and biases to random values near 0
-    srand(0);
-    for(std::size_t i = 0; i < layers.size()-1; i++){
-        for(int j = 0; j < layers[i+1]; j++){
-            for(int k = 0; k < layers[i]; k++){
-                weights[i].at(j,k) = (rand() % 1000 - 500) / 1000.0;
-            }
-        }
-    }
-
     float Eg2 = 1;
     float delloss = 1;
     float oldloss = INFINITY;

@@ -7,6 +7,7 @@ const std::string trainPath = "mnist/mnist_train.csv";
 const std::string testPath = "mnist/mnist_test.csv";
 const int trainSize = 60000;
 const int testSize = 10000;
+const int batches = 50;
 
 std::vector<std::string> split(std::string in, char del){
     std::vector<std::string> out;
@@ -59,8 +60,10 @@ int main(){
     std::ifstream trainFile(trainPath);
     std::ifstream testFile(testPath);
 
-    Matrix<float> Xtrain(trainSize, 784);
-    Matrix<float> Ytrain(trainSize, 10);
+    std::vector<Matrix<float>> XtrainBatches(batches, Matrix<float>(trainSize/batches, 784, -1));
+    std::vector<Matrix<float>> YtrainBatches(batches, Matrix<float>(trainSize/batches, 10));
+    // Matrix<float> Xtrain(trainSize, 784);
+    // Matrix<float> Ytrain(trainSize, 10);
     Matrix<float> Xtest(testSize, 784);
     Matrix<float> Ytest(testSize, 10);
 
@@ -68,9 +71,12 @@ int main(){
 
     // parse input and insert into matrices for testing data
     std::string line;
+    int batch = 0;
     for(int p = 0; p < trainSize; p++){
         std::getline(trainFile, line);
-        update(Xtrain, Ytrain, line, p);
+        if(p%(trainSize/batches)==0 && p)
+            batch++;
+        update(XtrainBatches[batch], YtrainBatches[batch], line, p%(trainSize/batches));
     }
 
     trainFile.close();
@@ -88,7 +94,10 @@ int main(){
 
     std::cout << "training..." << std::endl;
     
-    net.train(Xtrain, Ytrain, 0.001, 0.001, 100);
+    for(int i = 0; i < batches; i++){
+        std::cout << "Batch " << i << std::endl;
+        net.train(XtrainBatches[i], YtrainBatches[i], 0.001, 0.001, 1000);
+    }
     
     Matrix<float> Ypred = net.predict(Xtest);
     
