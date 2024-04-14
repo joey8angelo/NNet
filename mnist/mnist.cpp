@@ -136,7 +136,7 @@ int main(){
     net.outputLoss = true; // print out the current loss while training
     net.userActivation = ReLU; // use ReLU activation function
     net.userActivationPrime = ReLUPrime; // must define the derivative of the activation
-    net.miniBatchSize = 5; // size of mini batches(only used when doOnlineGradientDescent is true)
+    net.miniBatchSize = 40; // size of mini batches(only used when doOnlineGradientDescent is true)
 
     std::cout << "training..." << std::endl;
     
