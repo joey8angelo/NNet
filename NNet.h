@@ -45,9 +45,10 @@ NNet::~NNet(){}
 
 void NNet::setWeightsAndBias(const std::vector<Matrix<float>>& weights, const std::vector<Matrix<float>>& biases){
     std::string bad = "Matrices are not compatable with the current layer sizes";
-    if(this->weights.size() != weights.size() || this->biases.size() != biases.size())
+    if(this->weights.size() != weights.size() || this->biases.size() != biases.size()){
         throw std::runtime_error(bad);
         return;
+    }
     for(std::size_t i = 0; i < weights.size(); i++){
         if(this->weights[i].shape() != weights[i].shape() || this->biases[i].shape() != biases[i].shape()){
             throw std::runtime_error(bad);
