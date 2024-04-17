@@ -1,6 +1,6 @@
 ## NNet
 C++ implementation of a simple neural network, or multi-layer perceptron. The NNet class is constructed with a vector of integers, each integer represents how many nodes are in each layer.
-Dependant on https://github.com/joey8angelo/Matrix, which could could be swapped with some other linear algebra package. See the Matrix readme for compilation.
+Dependent on https://github.com/joey8angelo/Matrix, which could could be swapped with some other linear algebra package. See the Matrix readme for compilation.
 
 ### Training
 The Neural Net trains the weights and biases with the train function which has parameters:
