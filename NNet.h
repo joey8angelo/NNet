@@ -12,6 +12,8 @@ class NNet{
     ~NNet();
     Matrix<float> predict(const Matrix<float>&);
     void train(const Matrix<float>&, const Matrix<float>&, float, float, int);
+    void setWeightsAndBias();
+    void setWeightsAndBias(const std::vector<Matrix<float>>&, const std::vector<Matrix<float>>&);
     std::vector<int> layers;
     std::vector<Matrix<float>> weights;
     std::vector<Matrix<float>> biases;
@@ -31,7 +33,6 @@ class NNet{
     Matrix<float> softMax(const Matrix<float>&);
     float loss(const Matrix<float>&, const Matrix<float>&, float);
     void gradientDescent(const Matrix<float>&, const Matrix<float>&, float, float, int, float&);
-    void setWeightsAndBias();
     int nextPrime(int);
     bool isPrime(int);
 };
@@ -40,7 +41,23 @@ NNet::NNet(std::vector<int> layers) : layers(layers), userActivation(nullptr), u
     setWeightsAndBias();
 }
 
-NNet::~NNet(){
+NNet::~NNet(){}
+
+void NNet::setWeightsAndBias(const std::vector<Matrix<float>>& weights, const std::vector<Matrix<float>>& biases){
+    std::string bad = "Matrices are not compatable with the current layer sizes";
+    if(this->weights.size() != weights.size() || this->biases.size() != biases.size())
+        throw std::runtime_error(bad);
+        return;
+    for(std::size_t i = 0; i < weights.size(); i++){
+        if(this->weights[i].shape() != weights[i].shape() || this->biases[i].shape() != biases[i].shape()){
+            throw std::runtime_error(bad);
+            return;
+        }
+    }
+    for(std::size_t i = 0; i < weights.size(); i++){
+        this->weights[i] = weights[i];
+        this->biases[i] = biases[i];
+    }
 }
 
 void NNet::setWeightsAndBias(){
@@ -142,7 +159,7 @@ void NNet::gradientDescent(const Matrix<float>& input, const Matrix<float>& targ
 
 /*
     Updates the weights and biases with training data input, target
-    The regularization strength lambda penalizes the weights from straying too far away from zero - this can help prevent over fitting
+    The regularization strength lambda penalizes the weights that stray too far away from zero - this can help prevent over fitting
     error_threshold is the gradient descent stopping condition, if the loss does not change more than this value it stops
     gradient descent will stop after max_iter iterations
     
