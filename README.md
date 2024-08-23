@@ -34,4 +34,4 @@ see mnist/mnist.cpp for an example
 ### Prediction
 Prediction is a simple forward propagation, Matrix<float>& input is shaped (NumFeatures x NumExamples) and returns a Matrix<float> shaped (OutputLayerSize x NumExamples).
 
-MNIST achieves a 95% accuracy on the testing data and iris is able to get 96%.
+The models are able to get a 96% accuracy on both MNIST and iris datasets.
