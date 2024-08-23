@@ -3,20 +3,19 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 using type = Matrix<float>(*)(const Matrix<float>& i);
 
 class NNet{
     public:
-    NNet(std::vector<int>);
+    NNet(std::vector<int>, std::string, std::string);
     ~NNet();
     Matrix<float> predict(const Matrix<float>&);
     void train(const Matrix<float>&, const Matrix<float>&, float, float, int);
     void setWeightsAndBias();
-    void setWeightsAndBias(const std::vector<Matrix<float>>&, const std::vector<Matrix<float>>&);
-    std::vector<int> layers;
-    std::vector<Matrix<float>> weights;
-    std::vector<Matrix<float>> biases;
+    void writeWeightsAndBias(std::string, std::string);
+    void readWeightsAndBias(std::string, std::string);
     type userActivation;
     type userActivationPrime;
     bool applySoftMax;
@@ -24,6 +23,9 @@ class NNet{
     bool doOnLineGradientDescent;
     std::size_t miniBatchSize;
     private:
+    std::vector<int> layers;
+    std::vector<Matrix<float>> weights;
+    std::vector<Matrix<float>> biases;
     std::vector<Matrix<float>> backprop(const std::vector<Matrix<float>>&, const std::vector<Matrix<float>>&, const Matrix<float>&);
     Matrix<float> df(const Matrix<float>&, const Matrix<float>&);
     Matrix<float> activation(const Matrix<float>&, std::size_t);
@@ -37,36 +39,22 @@ class NNet{
     bool isPrime(int);
 };
 
-NNet::NNet(std::vector<int> layers) : layers(layers), userActivation(nullptr), userActivationPrime(nullptr), applySoftMax(false), outputLoss(false), doOnLineGradientDescent(false), miniBatchSize(1){
-    setWeightsAndBias();
-}
-
-NNet::~NNet(){}
-
-void NNet::setWeightsAndBias(const std::vector<Matrix<float>>& weights, const std::vector<Matrix<float>>& biases){
-    std::string bad = "Matrices are not compatable with the current layer sizes";
-    if(this->weights.size() != weights.size() || this->biases.size() != biases.size()){
-        throw std::runtime_error(bad);
-        return;
-    }
-    for(std::size_t i = 0; i < weights.size(); i++){
-        if(this->weights[i].shape() != weights[i].shape() || this->biases[i].shape() != biases[i].shape()){
-            throw std::runtime_error(bad);
-            return;
-        }
-    }
-    for(std::size_t i = 0; i < weights.size(); i++){
-        this->weights[i] = weights[i];
-        this->biases[i] = biases[i];
-    }
-}
-
-void NNet::setWeightsAndBias(){
+NNet::NNet(std::vector<int> layers, std::string wfile = "", std::string bfile = "") : userActivation(nullptr), userActivationPrime(nullptr), applySoftMax(false), outputLoss(false), doOnLineGradientDescent(false), miniBatchSize(1), layers(layers){
+    // initialize weights and biases
     for(std::size_t i = 0; i < layers.size()-1; i++){
         weights.push_back(Matrix<float>(layers[i+1], layers[i]));
         biases.push_back(Matrix<float>(layers[i+1], 1));
     }
-    // set weights and biases to random values near 0
+
+    if(wfile != "" || bfile != "") // read weights and biases from file
+        readWeightsAndBias(wfile, bfile);
+    else                           // set weights and biases to random values near 0
+        setWeightsAndBias();
+}
+
+NNet::~NNet(){}
+
+void NNet::setWeightsAndBias(){
     srand(0);
     for(std::size_t i = 0; i < layers.size()-1; i++){
         for(int j = 0; j < layers[i+1]; j++){
@@ -74,6 +62,41 @@ void NNet::setWeightsAndBias(){
                 weights[i].at(j,k) = (rand() % 1000 - 500) / 1000.0;
             }
             biases[i].at(i,0) = (rand() % 1000 - 500) / 1000.0;
+        }
+    }
+}
+
+void NNet::writeWeightsAndBias(std::string wfile, std::string bfile){
+    std::ofstream w(wfile);
+    std::ofstream b(bfile);
+    if(!w.is_open() || !b.is_open()){
+        std::cerr << "Error opening weights and biases file... Not writing to file\n";
+        return;
+    }
+    for(std::size_t i = 0; i < layers.size()-1; i++){
+        for(int j = 0; j < layers[i+1]; j++){
+            for(int k = 0; k < layers[i]; k++){
+                w << weights[i].at(j,k) << ' ';
+            }
+            b << biases[i].at(j,0) << ' ';
+        }
+    }
+}
+
+void NNet::readWeightsAndBias(std::string wfile, std::string bfile){
+    std::ifstream w(wfile);
+    std::ifstream b(bfile);
+    if (!w.is_open() || !b.is_open()){
+        std::cerr << "Error opening weights and biases file... Using default random initial weights and biases\n";
+        setWeightsAndBias();
+        return;
+    }
+    for(std::size_t i = 0; i < layers.size()-1; i++){
+        for(int j = 0; j < layers[i+1]; j++){
+            for(int k = 0; k < layers[i]; k++){
+                w >> weights[i].at(j,k);
+            }
+            b >> biases[i].at(j,0);
         }
     }
 }
