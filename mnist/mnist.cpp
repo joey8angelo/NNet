@@ -155,4 +155,10 @@ int main(){
             correct++;
     }
     std::cout << "accuracy: " << correct/testSize << std::endl;
+
+    std::vector<int> layers = {784, 16, 16, 10};
+    NNet net(layers);
+
+    net.readWeightsAndBias("weights.txt", "bias.txt");
+    net.writeWeightsAndBias("weights", "bias");
 }

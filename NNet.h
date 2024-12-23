@@ -67,19 +67,21 @@ void NNet::setWeightsAndBias(){
 }
 
 void NNet::writeWeightsAndBias(std::string wfile, std::string bfile){
-    std::ofstream w(wfile);
-    std::ofstream b(bfile);
-    if(!w.is_open() || !b.is_open()){
-        std::cerr << "Error opening weights and biases file... Not writing to file\n";
-        return;
-    }
     for(std::size_t i = 0; i < layers.size()-1; i++){
+        std::ofstream w(wfile + "_layer" + std::to_string(i) + ".txt");
+        std::ofstream b(bfile + "_layer" + std::to_string(i) + ".txt");
+        if(!w.is_open() || !b.is_open()){
+            std::cerr << "Error opening weights and biases file... Not writing to file\n";
+            return;
+        }
         for(int j = 0; j < layers[i+1]; j++){
             for(int k = 0; k < layers[i]; k++){
-                w << weights[i].at(j,k) << ' ';
+                w << weights[i].at(j,k) << ", ";
             }
-            b << biases[i].at(j,0) << ' ';
+            w << '\n';
+            b << biases[i].at(j,0) << ", ";
         }
+        b << '\n';
     }
 }
 
